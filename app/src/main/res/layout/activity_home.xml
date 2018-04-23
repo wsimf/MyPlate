@@ -1,27 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="compsci701.uoa.calcounter.HomeActivity">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context=".HomeActivity">
 
-    <EditText
-        android:id="@+id/height"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name"
-        tools:layout_editor_absoluteX="142dp"
-        tools:layout_editor_absoluteY="69dp"/>
+    <RelativeLayout
+        android:layout_weight="0.7"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/bmi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="189dp"
-        tools:layout_editor_absoluteY="185dp"/>
-</android.support.constraint.ConstraintLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.3">
+
+        <TextView
+            android:id="@+id/name_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="32dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="26dp"
+            android:text="Name" />
+
+        <EditText
+            android:id="@+id/name_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/name_lbl"
+            android:layout_toEndOf="@+id/name_lbl"
+            android:layout_marginLeft="48dp"
+            android:layout_marginStart="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="24dp"
+            android:layout_marginRight="24dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Name" />
+
+        <TextView
+            android:id="@+id/surname_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/name_lbl"
+            android:layout_alignStart="@+id/name_lbl"
+            android:layout_below="@+id/name_txt"
+            android:layout_marginTop="17dp"
+            android:text="Surname" />
+
+        <EditText
+            android:id="@+id/surname_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/name_txt"
+            android:layout_alignLeft="@+id/name_txt"
+            android:layout_alignRight="@+id/name_txt"
+            android:layout_alignEnd="@+id/name_txt"
+            android:layout_below="@+id/name_txt"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Name" />
+
+        <TextView
+            android:id="@+id/gender_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/surname_lbl"
+            android:layout_alignStart="@+id/surname_lbl"
+            android:layout_below="@+id/surname_txt"
+            android:layout_marginTop="16dp"
+            android:text="Gender" />
+
+        <Spinner
+            android:id="@+id/gender_spn"
+            android:layout_width="0.5in"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/gender_lbl"
+            android:layout_alignLeft="@+id/surname_txt"
+            android:layout_alignStart="@+id/surname_txt"
+            android:layout_below="@+id/surname_lbl"
+            android:layout_marginTop="16dp"
+            android:dropDownWidth="2dp" />
+
+        <TextView
+            android:id="@+id/height_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/gender_lbl"
+            android:layout_alignStart="@+id/gender_lbl"
+            android:layout_below="@+id/gender_lbl"
+            android:layout_marginTop="16dp"
+            android:text="Height" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/surname_txt"
+            android:layout_alignLeft="@+id/surname_txt"
+            android:layout_alignRight="@+id/surname_txt"
+            android:layout_alignStart="@+id/surname_txt"
+            android:layout_below="@+id/gender_lbl"
+            android:gravity="fill_horizontal"
+            android:weightSum="1"
+            android:orientation="horizontal"
+            android:id="@+id/height_container">
+
+            <EditText
+                android:id="@+id/height_txt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Name" />
+
+            <Spinner
+                android:id="@+id/height_spn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/weight_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/height_lbl"
+            android:layout_alignStart="@+id/height_lbl"
+            android:layout_below="@+id/height_lbl"
+            android:layout_marginTop="16dp"
+            android:text="Weight" />
+
+
+        <LinearLayout
+            android:id="@+id/weight_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/surname_txt"
+            android:layout_alignLeft="@+id/surname_txt"
+            android:layout_alignRight="@+id/surname_txt"
+            android:layout_alignStart="@+id/surname_txt"
+            android:layout_below="@+id/height_container"
+            android:gravity="fill_horizontal"
+            android:orientation="horizontal"
+            android:weightSum="1">
