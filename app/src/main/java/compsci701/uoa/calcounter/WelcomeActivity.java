@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 public class WelcomeActivity extends AppCompatActivity {
 
-
     private EditText _nameText;
     private EditText _ageText;
     private Spinner _genderSpinner;
@@ -27,15 +26,15 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_layout);
+        setContentView(R.layout.activity_welcome);
 
-        _nameText = findViewById(R.id.name_text);
-        _ageText = findViewById(R.id.age_text);
-        _genderSpinner = findViewById(R.id.gender_spinner);
-        _heightText = findViewById(R.id.height_text);
-        _weightText = findViewById(R.id.weight_text);
-        _activeSpinner = findViewById(R.id.active_spinner);
-        _createUser = findViewById(R.id.create_user_button);
+        _nameText = findViewById(R.id.name_txt);
+        _ageText = findViewById(R.id.age_txt);
+        _genderSpinner = findViewById(R.id.gender_spn);
+        _heightText = findViewById(R.id.height_txt);
+        _weightText = findViewById(R.id.weight_txt);
+        _activeSpinner = findViewById(R.id.activity_level_spn);
+        _createUser = findViewById(R.id.save_btn);
 
         User.Gender[] genders = User.Gender.values();
         User.ActivityFactor[] activityFactors = User.ActivityFactor.values();
