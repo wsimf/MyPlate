@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -151,4 +152,5 @@ public class User implements Serializable {
     public double getDCN() {
         return _dailyCaloricNeeds;
     }
+
 }

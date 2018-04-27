@@ -1,10 +1,12 @@
 package compsci701.uoa.calcounter;
 
+import java.io.Serializable;
+
 /**
  * Created by natha on 27/04/2018.
  */
 
-public class MealPlan {
+public class MealPlan implements Serializable {
 
     private String _name;
     private Meal _breakfast;

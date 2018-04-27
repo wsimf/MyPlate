@@ -61,12 +61,13 @@ public class WelcomeActivity extends AppCompatActivity {
             activityFactorNames.add(i.toString());
         }
 
+        // the spinners are populated
+
         ArrayAdapter<String> genderSpinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, genderNames);
         _genderSpinner.setAdapter(genderSpinnerArrayAdapter);
 
         ArrayAdapter<String> activityFactorSpinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, activityFactorNames);
         _activeSpinner.setAdapter(activityFactorSpinnerArrayAdapter);
-
 
         _createUser.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,6 +87,9 @@ public class WelcomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        //  this section converts a string into a series of json objects, which are then converted into
+        //  Meal objects and MealPlan objects.
 
         _mealPlans = new ArrayList<MealPlan>();
 
@@ -137,6 +141,13 @@ public class WelcomeActivity extends AppCompatActivity {
         }
 
     }
+
+    /*
+        This method reads from the meals.json file and converts it into a single string.
+
+            - as of now, it assumes that the json being read is in plain text, and isn't encoded.
+
+     */
 
     private String loadJSONFromAsset(Context context) {
         String json = null;
