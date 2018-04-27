@@ -1,10 +1,18 @@
 package compsci701.uoa.calcounter;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import org.json.JSONObject;
+
+import java.io.Serializable;
+
 /**
  * Created by natha on 24/04/2018.
  */
 
-public class User {
+public class User implements Serializable {
+
     public enum Gender {
         male(5),
         female(-161)
@@ -44,8 +52,8 @@ public class User {
     private double _height; // unit: cm
     private double _weight; // unit: kg
     private ActivityFactor _activityFactor;
-    private double _bodyMassIndex;
-    private double _dailyCaloricNeeds;
+    private double _bodyMassIndex = 0;
+    private double _dailyCaloricNeeds = 0;
 
     public User(String name, int age, Gender gender, double height, double weight, ActivityFactor activityFactor) {
         _name = name;
