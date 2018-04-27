@@ -1,5 +1,7 @@
 package compsci701.uoa.calcounter;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +11,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.content.Intent;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class WelcomeActivity extends AppCompatActivity {
@@ -22,6 +29,7 @@ public class WelcomeActivity extends AppCompatActivity {
     private Button _createUser;
 
     private User _currentUser;
+    private ArrayList<MealPlan> _mealPlans;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +43,7 @@ public class WelcomeActivity extends AppCompatActivity {
         _weightText = findViewById(R.id.weight_txt);
         _activeSpinner = findViewById(R.id.activity_level_spn);
         _createUser = findViewById(R.id.save_btn);
+
 
         User.Gender[] genders = User.Gender.values();
         User.ActivityFactor[] activityFactors = User.ActivityFactor.values();
@@ -50,6 +59,8 @@ public class WelcomeActivity extends AppCompatActivity {
         for (User.ActivityFactor i : activityFactors) {
             activityFactorNames.add(i.toString());
         }
+
+        // the spinners are populated
 
         ArrayAdapter<String> genderSpinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, genderNames);
         _genderSpinner.setAdapter(genderSpinnerArrayAdapter);
@@ -70,8 +81,92 @@ public class WelcomeActivity extends AppCompatActivity {
                 _currentUser = new User(name, age, gender, height, weight, activityFactor);
 
                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                intent.putExtra("USER", _currentUser);
+                intent.putExtra("MEALS", _mealPlans);
                 startActivity(intent);
             }
         });
+
+        //  this section converts a string into a series of json objects, which are then converted into
+        //  Meal objects and MealPlan objects.
+
+        _mealPlans = new ArrayList<MealPlan>();
+
+        try {
+            JSONObject meals = new JSONObject(loadJSONFromAsset(this));
+            JSONArray mealsArray = meals.getJSONArray("meals");
+
+            for (int i = 0; i < mealsArray.length; i++) {
+                JSONObject m = mealsArray.getJSONObject(i);
+                String name = m.getString("name");
+
+                JSONObject breakfast = m.getJSONObject("Breakfast");
+                String breakfastName = breakfast.getString("Name");
+                Double breakfastCalories = breakfast.getDouble("Calories");
+                JSONArray breakfastIngredientsArray = breakfast.getJSONArray("Ingredients");
+                String[] breakfastIngredients = new String[breakfastIngredientsArray.length];
+                for (int j = 0; j < breakfastIngredientsArray.length; j++) {
+                    breakfastIngredients[i] = (String) breakfastIngredientsArray.get(i);
+                }
+
+                Meal breakfastMeal = new Meal(breakfastName, Meal.MealType.Breakfast, breakfastCalories, breakfastIngredients);
+
+                JSONObject lunch = m.getJSONObject("Lunch");
+                String lunchName = lunch.getString("Name");
+                Double lunchCalories = lunch.getDouble("Calories");
+                JSONArray lunchIngredientsArray = lunch.getJSONArray("Ingredients");
+                String[] lunchIngredients = new String[lunchIngredientsArray.length];
+                for (int j = 0; j < lunchIngredientsArray.length; j++) {
+                    lunchIngredients[i] = (String) lunchIngredientsArray.get(i);
+                }
+
+                Meal lunchMeal = new Meal(lunchName, Meal.MealType.Lunch, LunchCalories, LunchIngredients);
+
+                JSONObject dinner = m.getJSONObject("Dinner");
+                String dinnerName = dinner.getString("Name");
+                Double dinnerCalories = dinner.getDouble("Calories");
+                JSONArray dinnerIngredientsArray = dinner.getJSONArray("Ingredients");
+                String[] dinnerIngredients = new String[dinnerIngredientsArray.length];
+                for (int j = 0; j < dinnerIngredientsArray.length; j++) {
+                    dinnerIngredients[i] = (String) dinnerIngredientsArray.get(i);
+                }
+
+                Meal dinnerMeal = new Meal(dinnerName, Meal.MealType.Dinner, dinnerCalories, dinnerIngredients);
+
+                mealPlans.add(new MealPlan(name, breakfastMeal, lunchMeal, dinnerMeal));
+            }
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /*
+        This method reads from the meals.json file and converts it into a single string.
+
+            - as of now, it assumes that the json being read is in plain text, and isn't encoded.
+
+     */
+
+    private String loadJSONFromAsset(Context context) {
+        String json = null;
+
+        try {
+            InputStream is = context.getAssets().open("meals.json");
+
+            int size = is.available();
+            byte[] buffer = new byte[size];
+
+            is.read(buffer);
+
+            is.close();
+
+            json = new String(buffer, "UTF-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return json;
     }
 }
