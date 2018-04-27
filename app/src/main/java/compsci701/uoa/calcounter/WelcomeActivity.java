@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import compsci701.uoa.calcounter.security.DataDecoder;
+
 public class WelcomeActivity extends AppCompatActivity {
 
     private EditText _nameText;
@@ -93,10 +95,10 @@ public class WelcomeActivity extends AppCompatActivity {
         _mealPlans = new ArrayList<MealPlan>();
 
         try {
-            JSONObject meals = new JSONObject(loadJSONFromAsset(this));
+            JSONObject meals = new DataDecoder().getMeals(this);
             JSONArray mealsArray = meals.getJSONArray("meals");
 
-            for (int i = 0; i < mealsArray.length; i++) {
+            for (int i = 0; i < mealsArray.length(); i++) {
                 JSONObject m = mealsArray.getJSONObject(i);
                 String name = m.getString("name");
 
@@ -104,8 +106,8 @@ public class WelcomeActivity extends AppCompatActivity {
                 String breakfastName = breakfast.getString("Name");
                 Double breakfastCalories = breakfast.getDouble("Calories");
                 JSONArray breakfastIngredientsArray = breakfast.getJSONArray("Ingredients");
-                String[] breakfastIngredients = new String[breakfastIngredientsArray.length];
-                for (int j = 0; j < breakfastIngredientsArray.length; j++) {
+                String[] breakfastIngredients = new String[breakfastIngredientsArray.length()];
+                for (int j = 0; j < breakfastIngredientsArray.length(); j++) {
                     breakfastIngredients[i] = (String) breakfastIngredientsArray.get(i);
                 }
 
@@ -115,25 +117,25 @@ public class WelcomeActivity extends AppCompatActivity {
                 String lunchName = lunch.getString("Name");
                 Double lunchCalories = lunch.getDouble("Calories");
                 JSONArray lunchIngredientsArray = lunch.getJSONArray("Ingredients");
-                String[] lunchIngredients = new String[lunchIngredientsArray.length];
-                for (int j = 0; j < lunchIngredientsArray.length; j++) {
+                String[] lunchIngredients = new String[lunchIngredientsArray.length()];
+                for (int j = 0; j < lunchIngredientsArray.length(); j++) {
                     lunchIngredients[i] = (String) lunchIngredientsArray.get(i);
                 }
 
-                Meal lunchMeal = new Meal(lunchName, Meal.MealType.Lunch, LunchCalories, LunchIngredients);
+                Meal lunchMeal = new Meal(lunchName, Meal.MealType.Lunch, lunchCalories, lunchIngredients);
 
                 JSONObject dinner = m.getJSONObject("Dinner");
                 String dinnerName = dinner.getString("Name");
                 Double dinnerCalories = dinner.getDouble("Calories");
                 JSONArray dinnerIngredientsArray = dinner.getJSONArray("Ingredients");
-                String[] dinnerIngredients = new String[dinnerIngredientsArray.length];
-                for (int j = 0; j < dinnerIngredientsArray.length; j++) {
+                String[] dinnerIngredients = new String[dinnerIngredientsArray.length()];
+                for (int j = 0; j < dinnerIngredientsArray.length(); j++) {
                     dinnerIngredients[i] = (String) dinnerIngredientsArray.get(i);
                 }
 
                 Meal dinnerMeal = new Meal(dinnerName, Meal.MealType.Dinner, dinnerCalories, dinnerIngredients);
 
-                mealPlans.add(new MealPlan(name, breakfastMeal, lunchMeal, dinnerMeal));
+                _mealPlans.add(new MealPlan(name, breakfastMeal, lunchMeal, dinnerMeal));
             }
         } catch (org.json.JSONException e) {
             e.printStackTrace();
