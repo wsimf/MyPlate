@@ -18,6 +18,11 @@
         </activity>
         <activity android:name=".HomeActivity">
         </activity>
+        <activity
+            android:name=".MealPlanActivity"
+            android:label="@string/title_activity_meal_plan"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

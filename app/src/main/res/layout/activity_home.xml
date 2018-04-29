@@ -75,8 +75,10 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/breakfast_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_weight="0.27">
 
         <TextView
@@ -90,11 +92,24 @@
             android:textSize="24sp"
             android:text="Breakfast"/>
 
+        <TextView
+            android:id="@+id/breakfast_summery_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="16dp"
+            android:text="Your meal for breakfast is "
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/lunch_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_weight="0.27">
 
         <TextView
@@ -107,11 +122,25 @@
             android:layout_margin="16dp"
             android:text="Lunch"
             android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/lunch_summery_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="16dp"
+            android:text="Your meal for lunch is "
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/dinner_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_weight="0.27">
 
         <TextView
@@ -124,6 +153,17 @@
             android:layout_margin="16dp"
             android:text="Dinner"
             android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/dinner_summery_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="16dp"
+            android:text="Your meal for dinner is "
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
 
     </RelativeLayout>
 

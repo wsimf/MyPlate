@@ -1,10 +1,6 @@
-package compsci701.uoa.calcounter;
+package compsci701.uoa.calcounter.model;
 
 import java.io.Serializable;
-
-/**
- * Created by natha on 27/04/2018.
- */
 
 public class MealPlan implements Serializable {
 

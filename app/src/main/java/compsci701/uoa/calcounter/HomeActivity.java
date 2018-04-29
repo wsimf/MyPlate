@@ -1,99 +1,104 @@
 package compsci701.uoa.calcounter;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.awt.Label;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
+import compsci701.uoa.calcounter.model.Meal;
+import compsci701.uoa.calcounter.model.MealPlan;
+import compsci701.uoa.calcounter.model.User;
+import compsci701.uoa.calcounter.security.DataDecoder;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private Label _bmiLabel;
-    private Label _rciLabel;
-    private Button _breakfastLabel;  // check the actual type first
-    private Button _lunchLabel;      // check the actual type first
-    private Button _dinnerLabel;     // check the actual type first
+    private ArrayList<MealPlan> _mealPlans = new ArrayList<>(10);
+    private MealPlan _selectedPlan = null;
 
-    private User _user;
-    private ArrayList<MealPlan> _mealPlans;
-    private Meal _breakfast;
-    private Meal _lunch;
-    private Meal _dinner;
-
-
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        _bmiLabel = findViewById(R.id.bmi_label);
-        _rciLabel = findViewById(R.id.rci_label);
+        final User _user = new DataDecoder().getUser(this);
+        prepareMealPlans();
 
-        _breakfastLabel = findViewById(R.id.breakfast_label);
-        _lunchLabel = findViewById(R.id.lunch_label);
-        _dinnerLabel = findViewById(R.id.dinner_label);
+        final TextView _bmiLabel = findViewById(R.id.bmi_txt);
+        final TextView _rciLabel = findViewById(R.id.rcc_txt);
+        _bmiLabel.setText(String.valueOf(_user.getBMI()));
+        _rciLabel.setText(String.valueOf(_user.getDCN()));
 
-        _user = (User) getIntent().getSerializableExtra("USER");
-        _mealPlans = (ArrayList<MealPlan>) getIntent().getSerializableExtra("MEALS");
-
-        _bmiLabel.setText(_user.getBMI()+"");
-        _rciLabel.setText(_user.getDCN()+"");
+        final TextView _breakfastLabel = findViewById(R.id.breakfast_summery_lbl);
+        final TextView _lunchLabel = findViewById(R.id.lunch_summery_lbl);
+        final TextView _dinnerLabel = findViewById(R.id.dinner_summery_lbl);
 
         Double mealCalories = _user.getDCN() / 3;
-
         int[] mealCalorieRanges = {400, 466, 533, 600, 666, 733, 800, 866, 933, 1000};
-
         for (int i = 0; i < mealCalorieRanges.length; i++) {
             if (mealCalories < mealCalorieRanges[i]) {
-                _breakfast = _mealPlans.get(i).getBreakfast();
-                _lunch = _mealPlans.get(i).getLunch();
-                _dinner = _mealPlans.get(i).getDinner();
+                _selectedPlan = _mealPlans.get(i);
                 break;
             }
         }
 
-        _breakfastLabel.setText(_breakfast.getName());
-        _lunchLabel.setText(_lunch.getName());
-        _dinnerLabel.setText(_dinner.getName());
+        if (_selectedPlan == null) {
+            _selectedPlan = _mealPlans.get(_mealPlans.size() - 1);
+        }
 
-        _breakfastLabel.setOnClickListener(new View.OnClickListener() {
+        _breakfastLabel.setText(_breakfastLabel.getText() + _selectedPlan.getBreakfast().getName());
+        _lunchLabel.setText(_lunchLabel.getText() + _selectedPlan.getLunch().getName());
+        _dinnerLabel.setText(_dinnerLabel.getText() + _selectedPlan.getDinner().getName());
+
+        findViewById(R.id.breakfast_view).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class); // change to activity for individual meal
-                intent.putExtra("USER", _user);
-                intent.putExtra("MEAL", _breakfast);
-                startActivity(intent);
+                goToMealView(_selectedPlan.getBreakfast());
             }
         });
 
-        _lunchLabel.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.lunch_view).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class); // change to activity for individual meal
-                intent.putExtra("USER", _user);
-                intent.putExtra("MEAL", _lunch);
-                startActivity(intent);
+                goToMealView(_selectedPlan.getLunch());
             }
         });
 
-        _dinnerLabel.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.dinner_view).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class); // change to activity for individual meal
-                intent.putExtra("USER", _user);
-                intent.putExtra("MEAL", _dinner);
-                startActivity(intent);
+                goToMealView(_selectedPlan.getDinner());
             }
         });
-
     }
 
+    private void prepareMealPlans() {
+        try {
+            JSONArray mealsArray = new DataDecoder().getMeals(this).getJSONArray("meals");
+            for (int i = 0; i < mealsArray.length(); i++) {
+                JSONObject m = mealsArray.getJSONObject(i);
+                final Meal breakfast = new Meal(Meal.MealType.Breakfast, m.getJSONObject("Breakfast"));
+                final Meal lunch = new Meal(Meal.MealType.Lunch, m.getJSONObject("Lunch"));
+                final Meal dinner = new Meal(Meal.MealType.Dinner, m.getJSONObject("Dinner"));
+                final String name = m.getString("name");
+                _mealPlans.add(new MealPlan(name, breakfast, lunch, dinner));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void goToMealView(final Meal meal) {
+        Intent intent = new Intent(getApplicationContext(), MealPlanActivity.class);
+        intent.putExtra("meal", meal);
+        startActivity(intent);
+    }
 }

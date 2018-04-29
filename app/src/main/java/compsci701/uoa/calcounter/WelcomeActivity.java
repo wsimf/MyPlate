@@ -1,51 +1,38 @@
 package compsci701.uoa.calcounter;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.content.Intent;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
-import compsci701.uoa.calcounter.security.DataDecoder;
+import compsci701.uoa.calcounter.model.User;
 
 public class WelcomeActivity extends AppCompatActivity {
-
-    private EditText _nameText;
-    private EditText _ageText;
-    private Spinner _genderSpinner;
-    private EditText _heightText;
-    private EditText _weightText;
-    private Spinner _activeSpinner;
-    private Button _createUser;
-
-    private User _currentUser;
-    private ArrayList<MealPlan> _mealPlans;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (PreferenceManager.getDefaultSharedPreferences(this).contains(User.getStoreName())) {
+            goToHome();
+            return;
+        }
+
         setContentView(R.layout.activity_welcome);
 
-        _nameText = findViewById(R.id.name_txt);
-        _ageText = findViewById(R.id.age_txt);
-        _genderSpinner = findViewById(R.id.gender_spn);
-        _heightText = findViewById(R.id.height_txt);
-        _weightText = findViewById(R.id.weight_txt);
-        _activeSpinner = findViewById(R.id.activity_level_spn);
-        _createUser = findViewById(R.id.save_btn);
-
+        final EditText _nameText = findViewById(R.id.name_txt);
+        final EditText _ageText = findViewById(R.id.age_txt);
+        final Spinner _genderSpinner = findViewById(R.id.gender_spn);
+        final EditText _heightText = findViewById(R.id.height_txt);
+        final EditText _weightText = findViewById(R.id.weight_txt);
+        final Spinner _activeSpinner = findViewById(R.id.activity_level_spn);
+        final Button _createUser = findViewById(R.id.save_btn);
 
         User.Gender[] genders = User.Gender.values();
         User.ActivityFactor[] activityFactors = User.ActivityFactor.values();
@@ -61,8 +48,6 @@ public class WelcomeActivity extends AppCompatActivity {
         for (User.ActivityFactor i : activityFactors) {
             activityFactorNames.add(i.toString());
         }
-
-        // the spinners are populated
 
         ArrayAdapter<String> genderSpinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, genderNames);
         _genderSpinner.setAdapter(genderSpinnerArrayAdapter);
@@ -80,95 +65,17 @@ public class WelcomeActivity extends AppCompatActivity {
                 double weight = Double.parseDouble(_weightText.getText().toString());
                 User.ActivityFactor activityFactor = User.ActivityFactor.valueOf(_activeSpinner.getSelectedItem().toString());
 
-                _currentUser = new User(name, age, gender, height, weight, activityFactor);
+                final User user = new User(name, age, gender, height, weight, activityFactor);
+                user.save(WelcomeActivity.this);
 
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                intent.putExtra("USER", _currentUser);
-                intent.putExtra("MEALS", _mealPlans);
-                startActivity(intent);
+                goToHome();
             }
         });
-
-        //  this section converts a string into a series of json objects, which are then converted into
-        //  Meal objects and MealPlan objects.
-
-        _mealPlans = new ArrayList<MealPlan>();
-
-        try {
-            JSONObject meals = new DataDecoder().getMeals(this);
-            JSONArray mealsArray = meals.getJSONArray("meals");
-
-            for (int i = 0; i < mealsArray.length(); i++) {
-                JSONObject m = mealsArray.getJSONObject(i);
-                String name = m.getString("name");
-
-                JSONObject breakfast = m.getJSONObject("Breakfast");
-                String breakfastName = breakfast.getString("Name");
-                Double breakfastCalories = breakfast.getDouble("Calories");
-                JSONArray breakfastIngredientsArray = breakfast.getJSONArray("Ingredients");
-                String[] breakfastIngredients = new String[breakfastIngredientsArray.length()];
-                for (int j = 0; j < breakfastIngredientsArray.length(); j++) {
-                    breakfastIngredients[i] = (String) breakfastIngredientsArray.get(i);
-                }
-
-                Meal breakfastMeal = new Meal(breakfastName, Meal.MealType.Breakfast, breakfastCalories, breakfastIngredients);
-
-                JSONObject lunch = m.getJSONObject("Lunch");
-                String lunchName = lunch.getString("Name");
-                Double lunchCalories = lunch.getDouble("Calories");
-                JSONArray lunchIngredientsArray = lunch.getJSONArray("Ingredients");
-                String[] lunchIngredients = new String[lunchIngredientsArray.length()];
-                for (int j = 0; j < lunchIngredientsArray.length(); j++) {
-                    lunchIngredients[i] = (String) lunchIngredientsArray.get(i);
-                }
-
-                Meal lunchMeal = new Meal(lunchName, Meal.MealType.Lunch, lunchCalories, lunchIngredients);
-
-                JSONObject dinner = m.getJSONObject("Dinner");
-                String dinnerName = dinner.getString("Name");
-                Double dinnerCalories = dinner.getDouble("Calories");
-                JSONArray dinnerIngredientsArray = dinner.getJSONArray("Ingredients");
-                String[] dinnerIngredients = new String[dinnerIngredientsArray.length()];
-                for (int j = 0; j < dinnerIngredientsArray.length(); j++) {
-                    dinnerIngredients[i] = (String) dinnerIngredientsArray.get(i);
-                }
-
-                Meal dinnerMeal = new Meal(dinnerName, Meal.MealType.Dinner, dinnerCalories, dinnerIngredients);
-
-                _mealPlans.add(new MealPlan(name, breakfastMeal, lunchMeal, dinnerMeal));
-            }
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
-        }
-
     }
 
-    /*
-        This method reads from the meals.json file and converts it into a single string.
-
-            - as of now, it assumes that the json being read is in plain text, and isn't encoded.
-
-     */
-
-    private String loadJSONFromAsset(Context context) {
-        String json = null;
-
-        try {
-            InputStream is = context.getAssets().open("meals.json");
-
-            int size = is.available();
-            byte[] buffer = new byte[size];
-
-            is.read(buffer);
-
-            is.close();
-
-            json = new String(buffer, "UTF-8");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return json;
+    private void goToHome() {
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

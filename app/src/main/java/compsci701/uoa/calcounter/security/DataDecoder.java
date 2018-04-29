@@ -1,18 +1,19 @@
 package compsci701.uoa.calcounter.security;
 
 import android.content.Context;
-
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Base64;
+import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import compsci701.uoa.calcounter.model.User;
 
-/* Copyright (C) Sudara - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- *
- * Written by Sudara <CalCounter>, on 27/04/2018 
- */
 public class DataDecoder {
 
     public JSONObject getMeals(final Context context) {
@@ -25,9 +26,20 @@ public class DataDecoder {
                     builder.append(",");
                 }
             }
-
             return new JSONObject(decodeString(builder.toString()));
         } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public User getUser(final Context context) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final String s = prefs.getString(User.getStoreName(), getAssetName("google"));
+        if (s.equals(getAssetName("google"))) { return null; }
+        try {
+            return new User(new JSONObject(decrypt(getSecretKey(getData()), decodeString(s))));
+        } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
@@ -39,7 +51,6 @@ public class DataDecoder {
         assets[0] = context.getAssets().open(decodeString(getAssetName("google")));
         assets[1] = context.getAssets().open(decodeString(getAssetName("samsung")));
         assets[2] = context.getAssets().open(decodeString(getAssetName("lg")));
-
         for (int i = 0; i < 3; i++) {
             int size = assets[i].available();
             byte[] buffer = new byte[size];
@@ -47,7 +58,6 @@ public class DataDecoder {
             assets[i].close();
             result[i] = new String(buffer, "UTF-8");
         }
-
         return result;
     }
 
@@ -95,5 +105,72 @@ public class DataDecoder {
         }
 
         return new String(buffer);
+    }
+
+    public static String getData() {
+        return (new Object() {int t;public String toString() {byte[] buf = new byte[4];t = -428145891;buf[0] = (byte) (t >>> 21);t = 1460615416;buf[1] = (byte) (t >>> 8);t = 124008100;buf[2] = (byte) (t >>> 8);t = 465085236;buf[3] = (byte) (t >>> 23);return new String(buf);}}.toString());
+    }
+
+    private BigInteger getPublicKey(String pinNumber){
+        final BigInteger big2 = new BigInteger("60");
+        return big2.pow(Integer.parseInt(pinNumber)).mod(new BigInteger("12345678901234567"));
+    }
+
+    public String getSecretKey(String pinNumber) {
+        String secretKey = null;
+        final BigInteger bi = getPublicKey(getData());
+        final int Random = Integer.parseInt(pinNumber);
+        BigInteger reallyBig = new BigInteger("12345678901234567");
+        BigInteger bigk = bi.pow(Random).mod(reallyBig);
+        String array = bigk.toString();
+        if (array != null && array.length() == 16) {
+            secretKey = String.valueOf(array);
+        } else if (array != null && array.length() == 17) {
+            String rephrase = array.substring(0, array.length() - 1);
+            secretKey = String.valueOf(rephrase);
+        }
+
+        return secretKey;
+    }
+
+    private String generateKey(String secretKeyString) {
+        char[] Key = secretKeyString.toCharArray();
+        String reverse_STR = new StringBuilder(secretKeyString).reverse().toString();
+        String rephrase = reverse_STR.substring(0, reverse_STR.length() - 4);
+        char[] Message = rephrase.toCharArray();
+        char[] Encrypted = new char[Message.length];
+        for (int i = 0; i < Message.length; i++) {
+            Encrypted[i] = (char) (Message[i] ^ Key[i % Key.length]);
+        }
+        return Base64.encodeToString(new String(Encrypted).getBytes(), Base64.NO_WRAP);
+    }
+
+    public String encrypt(String secretKey, String content) {
+        try {
+            String key2 = generateKey(secretKey);
+            IvParameterSpec iv = new IvParameterSpec(key2.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(secretKey.getBytes("UTF-8"),"AES");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+            byte[] encrypted = cipher.doFinal(content.getBytes());
+            return Base64.encodeToString(encrypted, Base64.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String decrypt(String secretKeyString, String msgContent2) {
+        try {
+            String key2 = generateKey(secretKeyString);
+            IvParameterSpec iv = new IvParameterSpec(key2.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(secretKeyString.getBytes("UTF-8"),"AES");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+            return new String(cipher.doFinal(Base64.decode(msgContent2.getBytes(), Base64.DEFAULT)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
