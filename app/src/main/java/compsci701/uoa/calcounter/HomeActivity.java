@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import compsci701.uoa.calcounter.model.Meal;
 import compsci701.uoa.calcounter.model.MealPlan;
@@ -34,8 +35,8 @@ public class HomeActivity extends AppCompatActivity {
 
         final TextView _bmiLabel = findViewById(R.id.bmi_txt);
         final TextView _rciLabel = findViewById(R.id.rcc_txt);
-        _bmiLabel.setText(String.valueOf(_user.getBMI()));
-        _rciLabel.setText(String.valueOf(_user.getDCN()));
+        _bmiLabel.setText(String.format(Locale.getDefault(), "%.2f", _user.getBMI()));
+        _rciLabel.setText(String.format(Locale.getDefault(), "%.0f", _user.getDCN()));
 
         final TextView _breakfastLabel = findViewById(R.id.breakfast_summery_lbl);
         final TextView _lunchLabel = findViewById(R.id.lunch_summery_lbl);
@@ -85,9 +86,15 @@ public class HomeActivity extends AppCompatActivity {
             JSONArray mealsArray = new DataDecoder().getMeals(this).getJSONArray("meals");
             for (int i = 0; i < mealsArray.length(); i++) {
                 JSONObject m = mealsArray.getJSONObject(i);
-                final Meal breakfast = new Meal(Meal.MealType.Breakfast, m.getJSONObject("Breakfast"));
-                final Meal lunch = new Meal(Meal.MealType.Lunch, m.getJSONObject("Lunch"));
-                final Meal dinner = new Meal(Meal.MealType.Dinner, m.getJSONObject("Dinner"));
+
+                final JSONObject breakfastObj = m.has("Breakfast") ? m.getJSONObject("Breakfast") : m.getJSONObject("breakfast");
+                final Meal breakfast = new Meal(Meal.MealType.Breakfast, breakfastObj);
+
+                final JSONObject lunchObj = m.has("Lunch") ? m.getJSONObject("Lunch") : m.getJSONObject("lunch");
+                final Meal lunch = new Meal(Meal.MealType.Lunch, lunchObj);
+
+                final JSONObject dinnerObj = m.has("Dinner") ? m.getJSONObject("Dinner") : m.getJSONObject("dinner");
+                final Meal dinner = new Meal(Meal.MealType.Dinner, dinnerObj);
                 final String name = m.getString("name");
                 _mealPlans.add(new MealPlan(name, breakfast, lunch, dinner));
             }

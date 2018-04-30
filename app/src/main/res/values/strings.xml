@@ -1,4 +1,10 @@
 <resources>
-    <string name="app_name">CalCounter</string>
-    <string name="title_activity_meal_plan">MealPlanActivity</string>
+    <string name="app_name">My Plate</string>
+    <string name="title_activity_meal_plan">Plan your meals</string>
+
+    <array name="genders">
+        <item>male</item>
+        <item>female</item>
+    </array>
+
 </resources>

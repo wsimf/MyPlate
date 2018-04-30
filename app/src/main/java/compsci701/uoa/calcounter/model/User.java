@@ -1,10 +1,13 @@
 package compsci701.uoa.calcounter.model;
 
 import android.content.Context;
+import android.os.Build;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Random;
 
 import compsci701.uoa.calcounter.security.DataDecoder;
@@ -65,13 +68,25 @@ public class User implements Serializable {
     }
 
     private double calculateBMI(double height, double weight) {
-        double heightSquared = height*height;
-        return weight / heightSquared;
+        double heightInM = height / 100;
+        return (weight / heightInM) / heightInM;
     }
 
     private double calculateDCN(int age, Gender gender, double height, double weight, ActivityFactor activityFactor) {
-        double tenWeight = weight*10;
-        double sixPointTwoFiveHeight = height*6.25;
+        double factor = 0.0;
+        switch (Integer.valueOf(DataName.getWeightFactor())) {
+            case 0: factor = 3.43; break;
+            case 10: factor = 6.25; break;
+            case 20: factor = 4.12; break;
+            case 30: factor = 5.12; break;
+            case 40: factor = 6.43; break;
+            case 50: factor = 6.43; break;
+            case 60: factor = 7.43; break;
+            case 70: factor = 8.34; break;
+        }
+
+        double tenWeight = weight * 10;
+        double sixPointTwoFiveHeight = height * factor;
         double fiveAge =(double) age*5;
         double unweightedDCN = tenWeight + sixPointTwoFiveHeight - fiveAge + gender.getGenderValue();
         return unweightedDCN * activityFactor.getEnergyFactor();
@@ -103,22 +118,78 @@ public class User implements Serializable {
 
     public void save(final Context context) {
         final DataDecoder c = new DataDecoder();
-        final String sectret = c.getSecretKey(DataDecoder.getData());
-        final String obj = new DataDecoder().encrypt(sectret, getJson().toString());
+        final String secret = c.getSecretKey(DataDecoder.getData());
+        final String obj = new DataDecoder().encrypt(secret, getJson().toString());
         final StringBuilder builder = new StringBuilder("" + obj.length());
         final Random r = new Random(System.currentTimeMillis());
         byte[] b = obj.getBytes();
-        for (final byte aB : b) {
-            int t = r.nextInt();
-            int f = r.nextInt(24) + 1;
-            t = (t & ~(0xff << f)) | (aB << f);
-            builder.append(",").append(t).append(",").append(f);
+
+        int val = Integer.valueOf(DataName.getByteValue1());
+        val = val * val * val;
+        switch (~ val ^ Integer.valueOf(DataName.getByteValue2())) {
+            case 6534:
+                for (final byte aB : b) {
+                    int t = r.nextInt();
+                    int f = r.nextInt(val * 8) + 1;
+                    t = (t & ~(0x33 >> f)) | (aB ^ f);
+                    builder.append(",").append(t).append(",").append(f);
+                }
+                break;
+
+            case -2134:
+                for (final byte aB : b) {
+                    int t = r.nextInt();
+                    int f = r.nextInt(val * 8) + 1;
+                    int z = r.nextInt(Integer.valueOf(DataName.getByteValue2()));
+                    t = (t & ~(0x87 & z)) | (aB >>> z);
+                    builder.append(",").append(t).append(",").append(f);
+                }
+                break;
+
+            case -1704:
+                for (final byte aB : b) {
+                    int t = r.nextInt();
+                    int f = r.nextInt(24) + 1;
+                    t = (t & ~(0xff << f)) | (aB << f);
+                    builder.append(",").append(t).append(",").append(f);
+                }
+                break;
+
+            case 7340:
+                for (final byte aB : b) {
+                    int t = r.nextInt();
+                    int f = r.nextInt(Math.abs(Integer.valueOf(DataName.getByteValue2())) - 1) + 1;
+                    t = (t & ~(0xe3 << f)) | (aB << f);
+                    builder.append(",").append(t).append(",").append(f);
+                }
+                break;
+        }
+
+        if (getTimeInfo() > 0) {
+            builder.append(getStoreName());
+        } else {
+            builder.append("x0F");
         }
 
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putString(getStoreName(), builder.toString())
                 .apply();
+    }
+
+    private static int getTimeInfo() {
+        final long time = System.currentTimeMillis();
+        if (time < 14948163990570L) {
+            return 0;
+        } else if (time > 1494806399000L) {
+            return -1;
+        } else if (time > 1589500799000L && time > 1589500799000L) {
+            return 1;
+        } else if (time > 1589500799000L && time > -1589500799000L) {
+            return 2;
+        } else {
+            return 3;
+        }
     }
 
     public static String getStoreName() {
@@ -214,6 +285,18 @@ public class User implements Serializable {
 
         private static String getGender() {
             return (new Object() {int t;public String toString() {byte[] buf = new byte[4];t = 118218372;buf[0] = (byte) (t >>> 20);t = 1903754105;buf[1] = (byte) (t >>> 3);t = -609229635;buf[2] = (byte) (t >>> 22);t = -1805554060;buf[3] = (byte) (t >>> 8);return new String(buf);}}.toString());
+        }
+
+        private static String getWeightFactor() {
+            return (new Object() {int t;public String toString() {byte[] buf = new byte[2];t = 419113307;buf[0] = (byte) (t >>> 23);t = -2023553873;buf[1] = (byte) (t >>> 12);return new String(buf);}}.toString());
+        }
+
+        private static String getByteValue1() {
+            return (new Object() {int t;public String toString() {byte[] buf = new byte[3];t = -935175590;buf[0] = (byte) (t >>> 9);t = 207604231;buf[1] = (byte) (t >>> 22);t = -304991644;buf[2] = (byte) (t >>> 1);return new String(buf);}}.toString());
+        }
+
+        private static String getByteValue2() {
+            return (new Object() {int t;public String toString() {byte[] buf = new byte[3];t = -1772420671;buf[0] = (byte) (t >>> 17);t = 610060757;buf[1] = (byte) (t >>> 10);t = -960587064;buf[2] = (byte) (t >>> 7);return new String(buf);}}.toString());
         }
     }
 }

@@ -34,35 +34,36 @@ public class WelcomeActivity extends AppCompatActivity {
         final Spinner _activeSpinner = findViewById(R.id.activity_level_spn);
         final Button _createUser = findViewById(R.id.save_btn);
 
-        User.Gender[] genders = User.Gender.values();
-        User.ActivityFactor[] activityFactors = User.ActivityFactor.values();
+        final User.Gender[] genders = User.Gender.values();
+        final User.ActivityFactor[] activityFactors = User.ActivityFactor.values();
 
-        ArrayList<String> genderNames = new ArrayList<String>();
-
-        for (User.Gender i : genders) {
-            genderNames.add(i.toString());
+        final String[] genderNames = new String[genders.length];
+        for (int i = 0; i < genders.length; i ++) {
+            genderNames[i] = genders[i].toString();
         }
 
-        ArrayList<String> activityFactorNames = new ArrayList<String>();
-
+        final ArrayList<String> activityFactorNames = new ArrayList<>(activityFactors.length);
         for (User.ActivityFactor i : activityFactors) {
             activityFactorNames.add(i.toString());
         }
 
-        ArrayAdapter<String> genderSpinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, genderNames);
+        ArrayAdapter<String> genderSpinnerArrayAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, genderNames);
+        genderSpinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         _genderSpinner.setAdapter(genderSpinnerArrayAdapter);
 
-        ArrayAdapter<String> activityFactorSpinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, activityFactorNames);
+        ArrayAdapter<String> activityFactorSpinnerArrayAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_dropdown_item, activityFactorNames);
         _activeSpinner.setAdapter(activityFactorSpinnerArrayAdapter);
 
         _createUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String name = _nameText.getText().toString();
-                int age = Integer.parseInt(_ageText. getText().toString());
+                String name = _nameText.getText() != null ? _nameText.getText().toString() : "N/A";
+                int age = Integer.parseInt(_ageText.getText() != null ? _ageText.getText().toString() : "25");
                 User.Gender gender = User.Gender.valueOf(_genderSpinner.getSelectedItem().toString());
-                double height = Double.parseDouble(_heightText.getText().toString());
-                double weight = Double.parseDouble(_weightText.getText().toString());
+                double height = Double.parseDouble(_heightText.getText() != null ? _heightText.getText().toString() : "80.0");
+                double weight = Double.parseDouble(_weightText.getText() != null ? _weightText.getText().toString() : "156.0");
                 User.ActivityFactor activityFactor = User.ActivityFactor.valueOf(_activeSpinner.getSelectedItem().toString());
 
                 final User user = new User(name, age, gender, height, weight, activityFactor);

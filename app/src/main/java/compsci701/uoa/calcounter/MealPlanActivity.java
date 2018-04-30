@@ -20,7 +20,7 @@ public class MealPlanActivity extends AppCompatActivity {
 
         final TextView type = findViewById(R.id.type_heading_lbl);
         type.setText(meal.getMealType().toString());
-        
+
         final TextView rc = findViewById(R.id.rc_amount_lbl);
         rc.setText(String.valueOf(meal.getCalories()));
 

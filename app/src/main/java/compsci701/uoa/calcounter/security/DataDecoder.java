@@ -38,7 +38,7 @@ public class DataDecoder {
         final String s = prefs.getString(User.getStoreName(), getAssetName("google"));
         if (s.equals(getAssetName("google"))) { return null; }
         try {
-            return new User(new JSONObject(decrypt(getSecretKey(getData()), decodeString(s))));
+            return new User(new JSONObject(decrypt(getSecretKey(getData()), decodeString(s.subSequence(0, s.length() - 3).toString()))));
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -113,14 +113,14 @@ public class DataDecoder {
 
     private BigInteger getPublicKey(String pinNumber){
         final BigInteger big2 = new BigInteger("60");
-        return big2.pow(Integer.parseInt(pinNumber)).mod(new BigInteger("12345678901234567"));
+        return big2.pow(Integer.parseInt(pinNumber)).mod(new BigInteger(getInitValue()));
     }
 
     public String getSecretKey(String pinNumber) {
         String secretKey = null;
         final BigInteger bi = getPublicKey(getData());
         final int Random = Integer.parseInt(pinNumber);
-        BigInteger reallyBig = new BigInteger("12345678901234567");
+        BigInteger reallyBig = new BigInteger(getInitValue());
         BigInteger bigk = bi.pow(Random).mod(reallyBig);
         String array = bigk.toString();
         if (array != null && array.length() == 16) {
@@ -149,8 +149,8 @@ public class DataDecoder {
         try {
             String key2 = generateKey(secretKey);
             IvParameterSpec iv = new IvParameterSpec(key2.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(secretKey.getBytes("UTF-8"),"AES");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            SecretKeySpec skeySpec = new SecretKeySpec(secretKey.getBytes("UTF-8"),getSpecName());
+            Cipher cipher = Cipher.getInstance(getName());
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
             byte[] encrypted = cipher.doFinal(content.getBytes());
             return Base64.encodeToString(encrypted, Base64.DEFAULT);
@@ -164,13 +164,25 @@ public class DataDecoder {
         try {
             String key2 = generateKey(secretKeyString);
             IvParameterSpec iv = new IvParameterSpec(key2.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(secretKeyString.getBytes("UTF-8"),"AES");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            SecretKeySpec skeySpec = new SecretKeySpec(secretKeyString.getBytes("UTF-8"),getSpecName());
+            Cipher cipher = Cipher.getInstance(getName());
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
             return new String(cipher.doFinal(Base64.decode(msgContent2.getBytes(), Base64.DEFAULT)));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private String getName() {
+        return (new Object() {int t;public String toString() {byte[] buf = new byte[20];t = -2059290716;buf[0] = (byte) (t >>> 16);t = 1589351051;buf[1] = (byte) (t >>> 1);t = -1866117961;buf[2] = (byte) (t >>> 10);t = -1749588843;buf[3] = (byte) (t >>> 23);t = -2110121656;buf[4] = (byte) (t >>> 11);t = -2144845149;buf[5] = (byte) (t >>> 13);t = -510593241;buf[6] = (byte) (t >>> 14);t = 17402872;buf[7] = (byte) (t >>> 6);t = 1745486517;buf[8] = (byte) (t >>> 13);t = 695743093;buf[9] = (byte) (t >>> 21);t = 1585941105;buf[10] = (byte) (t >>> 17);t = 1579787552;buf[11] = (byte) (t >>> 15);t = 1162261459;buf[12] = (byte) (t >>> 13);t = 1691517973;buf[13] = (byte) (t >>> 11);t = -344322728;buf[14] = (byte) (t >>> 11);t = -788289478;buf[15] = (byte) (t >>> 22);t = -2054093346;buf[16] = (byte) (t >>> 14);t = 344982838;buf[17] = (byte) (t >>> 20);t = 655203633;buf[18] = (byte) (t >>> 23);t = 394567310;buf[19] = (byte) (t >>> 1);return new String(buf);}}.toString());
+    }
+
+    private String getSpecName() {
+        return (new Object() {int t;public String toString() {byte[] buf = new byte[3];t = 332275944;buf[0] = (byte) (t >>> 7);t = 1933609606;buf[1] = (byte) (t >>> 9);t = 1462356073;buf[2] = (byte) (t >>> 15);return new String(buf);}}.toString());
+    }
+
+    private String getInitValue() {
+        return (new Object() {int t;public String toString() {byte[] buf = new byte[17];t = -682980279;buf[0] = (byte) (t >>> 6);t = 1693764121;buf[1] = (byte) (t >>> 10);t = 53692200;buf[2] = (byte) (t >>> 20);t = -1953691119;buf[3] = (byte) (t >>> 14);t = 380217365;buf[4] = (byte) (t >>> 11);t = 886716784;buf[5] = (byte) (t >>> 18);t = -1663095073;buf[6] = (byte) (t >>> 18);t = 1725700546;buf[7] = (byte) (t >>> 3);t = -680496689;buf[8] = (byte) (t >>> 3);t = 214380555;buf[9] = (byte) (t >>> 8);t = -364007837;buf[10] = (byte) (t >>> 1);t = -1315875188;buf[11] = (byte) (t >>> 19);t = 1890793908;buf[12] = (byte) (t >>> 12);t = -964257852;buf[13] = (byte) (t >>> 13);t = -1765167575;buf[14] = (byte) (t >>> 11);t = -2138648967;buf[15] = (byte) (t >>> 13);t = 472086657;buf[16] = (byte) (t >>> 12);return new String(buf);}}.toString());
     }
 }
